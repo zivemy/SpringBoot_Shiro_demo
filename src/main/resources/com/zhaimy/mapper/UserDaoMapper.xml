@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhaimy.dao.UserDao">
+
+    <insert id="save" parameterType="User" keyProperty="id" useGeneratedKeys="true">
+        insert into t_user values(
+        #{id},
+        #{username},
+        #{password},
+        #{salt}
+        )
+    </insert>
+    <select id="findByUserName" resultType="com.zhaimy.entity.User">
+        select id,username,password,salt from t_user
+        where username = #{username}
+    </select>
+
+    <resultMap id="userMap" type="User">
+        <id column="uid" property="id"></id>
+        <result column="username" property="username"></result>
+        <!--角色信息-->
+        <collection property="roles" javaType="list" ofType="Role">
+            <id column="roleid" property="id"></id>
+            <result column="rolename" property="name"></result>
+        </collection>
+    </resultMap>
+
+    <select id="findRolesByUserName" resultType="com.zhaimy.entity.Role" resultMap="userMap">
+    SELECT u.id uid,u.username,r.id roleid, r.name rolename
+    FROM t_user u
+    LEFT JOIN t_user_role ur ON u.id = ur.userid
+    LEFT JOIN t_role r ON ur.roleid = r.id
+    WHERE u.username=#{username}
+    </select>
+    <select id="findPersByRoleId" parameterType="String" resultType="com.zhaimy.entity.Pers">
+    SELECT p.id,p.name,p.url,r.name FROM t_role r
+    LEFT JOIN t_role_pers rp ON r.id = rp.roleid
+    LEFT JOIN t_pers p ON rp.persid = p.id
+    WHERE r.id = #{id}
+
+
+    </select>
+</mapper>
